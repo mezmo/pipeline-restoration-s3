@@ -1,0 +1,14 @@
+version: '2.4'
+
+services:
+
+  pipeline-restoration:
+    build:
+      context: ../
+      target: test
+    env_file: ../env/test.env
+    command: sh -c 'npm run test:ci'
+    environment:
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: 'abcd'
+      AWS_SECRET_ACCESS_KEY: 'abcd'
