@@ -18,5 +18,60 @@
     "release-tool:render-local": "./release-tool render-local",
     "release-tool:test": "./release-tool test",
     "release-tool:test-render": "./release-tool test-render"
+  },
+  "name": "pipeline-restoration-s3",
+  "description": "Lambda script to send S3 messages to Pipeline",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mezmo/pipeline-restoration-s3.git"
+  },
+  "author": "Greg Janco <greg.janco@mezmo.com>",
+  "license": "SEE LICENSE IN LICENSE",
+  "eslintConfig": {
+    "root": true,
+    "ignorePatterns": [
+      "node_modules/",
+      "coverage/",
+      "deployment/"
+    ],
+    "extends": "logdna",
+    "parserOptions": {
+      "ecmaVersion": 2022
+    },
+    "env": {
+      "es2022": true
+    },
+    "rules": {
+      "max-len": [
+        2,
+        90,
+        {
+          "ignoreComments": true,
+          "ignoreTemplateLiterals": true
+        }
+      ],
+      "space-unary-ops": [
+        2,
+        {
+          "words": false,
+          "nonwords": false,
+          "overrides": {
+            "yield": true
+          }
+        }
+      ]
+    }
+  },
+  "bugs": {
+    "url": "https://github.com/mezmo/pipeline-restoration-s3/issues"
+  },
+  "homepage": "https://github.com/mezmo/pipeline-restoration-s3#readme",
+  "devDependencies": {
+    "@aws-sdk/client-s3": "^3.485.0",
+    "@aws-sdk/client-sqs": "^3.485.0",
+    "eslint": "^8.19.0",
+    "eslint-config-logdna": "^7.0.2"
   }
 }
