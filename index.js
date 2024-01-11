@@ -1,7 +1,7 @@
 'use strict'
 
-const {getFiles} = require('./lib/filelist.js')
-const {sendFiles} = require('./lib/sender.js')
+const filelist = require('./lib/filelist.js')
+const sender = require('./lib/sender.js')
 const DEFAULT_ARCHIVE_PREFIX = 'merged_'
 
 exports.handler = async function(event) {
@@ -30,11 +30,11 @@ exports.handler = async function(event) {
   const endDate = Date.parse(event.endDate)
   const queueUrl = event.queueUrl
 
-  const files = await getFiles({
+  const files = await filelist.getFiles({
     bucket
   , prefix: path + archivePrefix
   , startDate
   , endDate})
-  await sendFiles(queueUrl, bucket, files)
+  await sender.sendFiles(queueUrl, bucket, files)
 }
 
