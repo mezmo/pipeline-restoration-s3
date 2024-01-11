@@ -2,15 +2,13 @@
 
 const {getFiles} = require('./lib/filelist.js')
 const {sendFiles} = require('./lib/sender.js')
-const DEFUALT_ARCHIVE_PREFIX = 'merged_'
+const DEFAULT_ARCHIVE_PREFIX = 'merged_'
 
 exports.handler = async function(event) {
-  const archivePrefix = event.archivePrefix ? event.archivePrefix : DEFUALT_ARCHIVE_PREFIX
-  const bucket = event.bucket
-  const path = event.path ? event.path : ''
-  const startDate = Date.parse(event.startDate)
-  const endDate = Date.parse(event.endDate)
-  const queueUrl = event.queueUrl
+  if (!event) {
+    throw new Error('Event with the following parameters is '
+      + 'required (bucket, queueUrl, startDate, endDate)')
+  }
 
   if (!event.bucket) {
     throw new Error('Parameter bucket is required')
@@ -18,13 +16,25 @@ exports.handler = async function(event) {
   if (!event.queueUrl) {
     throw new Error('Parameter queueUrl is required')
   }
-  if (isNaN(startDate)) {
+  if (!event.startDate || isNaN(Date.parse(event.startDate))) {
     throw new Error('Parameter startDate must be a valid date')
   }
-  if (isNaN(endDate)) {
+  if (!event.endDate || isNaN(Date.parse(event.endDate))) {
     throw new Error('Parameter endDate must be a valid date')
   }
-  const files = await getFiles(bucket, path + archivePrefix, startDate, endDate)
+
+  const archivePrefix = event.archivePrefix ?? DEFAULT_ARCHIVE_PREFIX
+  const bucket = event.bucket
+  const path = event.path ?? ''
+  const startDate = Date.parse(event.startDate)
+  const endDate = Date.parse(event.endDate)
+  const queueUrl = event.queueUrl
+
+  const files = await getFiles({
+    bucket
+  , prefix: path + archivePrefix
+  , startDate
+  , endDate})
   await sendFiles(queueUrl, bucket, files)
 }
 
