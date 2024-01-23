@@ -12,4 +12,4 @@ services:
     environment:
       DEBUG: 0
       SERVICES: s3,sqs,lambda
-      SQS_ENDPOINT_STRATEGY: off
+      SQS_ENDPOINT_STRATEGY: "off"
