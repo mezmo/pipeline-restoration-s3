@@ -6,6 +6,7 @@ const config = require('semantic-release-config-logdna')
 module.exports = {
   ...config
 , npmPublish: false
+, branches: ['main']
 , plugins: remap(config.plugins)
 }
 
