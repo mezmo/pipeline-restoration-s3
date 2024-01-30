@@ -1,0 +1,34 @@
+# test artifacts
+.nyc_output
+coverage/
+tmp/
+output/
+lib-cov
+*.lcov
+.tap
+
+# IDE files
+.idea
+*.swp
+*.vim
+
+# dev files
+*.save
+*.tgz
+.npm
+.pnpm/
+.eslintcache/
+.node_repl_history
+node_modules/
+npm-debug.log
+.vscode
+pkg/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+#localstack
+compose/volume

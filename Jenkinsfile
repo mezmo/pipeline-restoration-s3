@@ -17,6 +17,7 @@ def filesyncAlert(String branch) {
         slackSend(color: "danger", channel: "#filesync-ci", message: "${env.JOB_NAME} failed! <${env.BUILD_URL}|link>")
     }
 }
+def TRIGGER_PATTERN = ".*@logdnabot.*"
 
 pipeline {
     agent {
@@ -32,7 +33,9 @@ pipeline {
         timestamps()
         withCredentials(CREDS)
     }
-
+    triggers {
+        issueCommentTrigger(TRIGGER_PATTERN)
+    }
     environment {
         GIT_BRANCH = "${GIT_BRANCH}"
         LAST_COMMITTER = sh(script: 'git log -1 --format=%ae', returnStdout: true).trim()
@@ -57,7 +60,6 @@ pipeline {
                     steps {
                         configFileProvider(NPMRC) {
                             sh 'npm ci --ignore-scripts'
-                            sh 'npm run release-tool:install'
                         }
                     }
                 }
@@ -65,54 +67,58 @@ pipeline {
                 stage('Lint') {
                     steps {
                         sh 'npm run lint'
-                        sh 'npm run release-tool:lint'
                     }
                 }
 
                 stage('Test') {
                     steps {
-                        sh 'mkdir -p coverage'
                         sh 'npm run test'
-                        sh 'npm run release-tool:test'
                     }
                 }
 
                 stage('Release:Dry') {
+                    agent {
+                        docker {
+                        image "us.gcr.io/logdna-k8s/node:20-ci"
+                        label 'ec2-fleet'
+                        customWorkspace("/tmp/workspace/${BUILD_TAG.replaceAll('%2F', '_')}")
+                        }
+                    }
+                    environment {
+                        GIT_BRANCH = "${GIT_BRANCH}"
+                        LAST_COMMITTER = sh(script: 'git log -1 --format=%ae', returnStdout: true).trim()
+                    }
                     when {
                         not { branch 'main' }
                     }
 
                     steps {
-                        sh 'npm run release:dry'
+                        sh 'npm run package'
+                        sh 'npm ci'
+                        sh "npm run release:dry"
                     }
                 }
 
                 stage('Release') {
+                    agent {
+                        docker {
+                        image "us.gcr.io/logdna-k8s/node:20-ci"
+                        label 'ec2-fleet'
+                        customWorkspace("/tmp/workspace/${BUILD_TAG.replaceAll('%2F', '_')}")
+                        }
+                    }
+                    environment {
+                        GIT_BRANCH = "${GIT_BRANCH}"
+                        LAST_COMMITTER = sh(script: 'git log -1 --format=%ae', returnStdout: true).trim()
+                    }
                     when {
                         branch 'main'
                     }
 
                     steps {
-                        sh 'npm run release'
-                        sh 'npm run release-tool:clean'
-                    }
-                }
-
-                stage('Build') {
-                    steps {
-                        sh 'npm run release-tool:build'
-                    }
-                }
-
-                stage('Publish') {
-                    when {
-                        anyOf {
-                            branch 'main'
-                        }
-                    }
-
-                    steps {
-                        sh 'npm run release-tool:publish'
+                        sh 'npm run package'
+                        sh 'npm ci'
+                        sh "npm run release"
                     }
                 }
             }

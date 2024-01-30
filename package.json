@@ -1,22 +1,75 @@
 {
   "scripts": {
-    "prerelease-tool:build": "npm run release-tool:install",
-    "prerelease-tool:clean": "npm run release-tool:install",
-    "prerelease-tool:lint": "npm run release-tool:install",
-    "prerelease-tool:publish": "npm run release-tool:install",
-    "prerelease-tool:render": "npm run release-tool:install",
-    "prerelease-tool:render-local": "npm run release-tool:install",
-    "prerelease-tool:test": "npm run release-tool:install",
-    "prerelease-tool:test-render": "npm run release-tool:install",
-    "release:dry": "semantic-release --no-ci --dry-run --branches=${GIT_BRANCH:-main}",
-    "release-tool:build": "./release-tool build",
-    "release-tool:clean": "./release-tool clean",
-    "release-tool:install": "test -x release-tool || npx --yes @answerbook/release-tool@latest install",
-    "release-tool:lint": "./release-tool lint",
-    "release-tool:publish": "./release-tool publish",
-    "release-tool:render": "./release-tool render",
-    "release-tool:render-local": "./release-tool render-local",
-    "release-tool:test": "./release-tool test",
-    "release-tool:test-render": "./release-tool test-render"
+    "lint": "eslint ./",
+    "test": "docker-compose -p pipeline-restoration-${BUILD_TAG:-1} -f compose/base.yml -f compose/test.yml up --remove-orphans --exit-code-from pipeline-restoration --build",
+    "tap": "tap",
+    "package": "./package.sh",
+    "release": "semantic-release",
+    "release:dry": "npm run release -- --dry-run --no-ci --branches ${GIT_BRANCH:-main}",
+    "test:ci": "./test-ci.sh"
+  },
+  "name": "pipeline-restoration-s3",
+  "description": "Lambda script to send S3 messages to Pipeline",
+  "version": "0.0.0",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/mezmo/pipeline-restoration-s3.git"
+  },
+  "author": "Greg Janco <greg.janco@mezmo.com>",
+  "license": "SEE LICENSE IN LICENSE",
+  "eslintConfig": {
+    "root": true,
+    "ignorePatterns": [
+      "node_modules/",
+      "coverage/",
+      "deployment/"
+    ],
+    "extends": "logdna",
+    "parserOptions": {
+      "ecmaVersion": 2022
+    },
+    "env": {
+      "es2022": true
+    },
+    "rules": {
+      "max-len": [
+        2,
+        90,
+        {
+          "ignoreComments": true,
+          "ignoreTemplateLiterals": true
+        }
+      ],
+      "space-unary-ops": [
+        2,
+        {
+          "words": false,
+          "nonwords": false,
+          "overrides": {
+            "yield": true
+          }
+        }
+      ]
+    }
+  },
+  "bugs": {
+    "url": "https://github.com/mezmo/pipeline-restoration-s3/issues"
+  },
+  "homepage": "https://github.com/mezmo/pipeline-restoration-s3#readme",
+  "devDependencies": {
+    "@aws-sdk/client-lambda": "^3.496.0",
+    "@aws-sdk/client-s3": "^3.485.0",
+    "@aws-sdk/client-sqs": "^3.485.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "eslint": "^8.19.0",
+    "eslint-config-logdna": "^7.0.2",
+    "semantic-release": "^18.0.0",
+    "semantic-release-config-logdna": "^1.3.0",
+    "tap": "^18.6.1"
+  },
+  "dependencies": {
+    "@logdna/env-config": "^2.0.1"
   }
 }
